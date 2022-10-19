@@ -1,8 +1,10 @@
 #!/bin/bash
 
-
-REPOS=`jf rt curl /api/repositories | jq '.[] | select(.packageType == "Docker" and .type != "VIRTUAL") | .key'`
-
+CLI="jf"
+if [[ "$1" == "legacy" ]]; then 
+        CLI="jfrog"
+fi
+REPOS=`$CLI rt curl /api/repositories | jq '.[] | select(.packageType == "Docker" and .type != "VIRTUAL") | .key'`
 COUNT=0
 
 while IFS= read -r line; do
@@ -10,7 +12,7 @@ while IFS= read -r line; do
     AQL2="\"repo\":$line"
     AQL3=',"type":"file", "created":{"$last":"3mo"}, "name":"manifest.json" }).include("sha256")'
     AQL="$AQL1$AQL2$AQL3"
-    RES=`jf rt curl -XPOST -H "Content-Type: text/plain" -d "$AQL" api/search/aql | jq .range.total`
+    RES=`$CLI rt curl -XPOST -H "Content-Type: text/plain" -d "$AQL" api/search/aql | jq .range.total`
     COUNT=$((COUNT+RES))
 done <<< "$REPOS"
 
