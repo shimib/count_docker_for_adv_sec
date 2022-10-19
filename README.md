@@ -4,7 +4,7 @@ This script will estimate the number of unique Docker images introduced in the l
 
 Pre-requites:
 1) Have the JFrog CLI installed and available on you path under <i>jf</i>. (see: https://jfrog.com/getcli/)
-2) Config the JFrog CLI with you Artifactory connection details as **an admin user** (see: https://www.jfrog.com/confluence/display/CLI/JFrog+CLI#JFrogCLI-JFrogPlatformConfiguration)
+2) Config the JFrog CLI with your Artifactory connection details as **an admin user** (see: https://www.jfrog.com/confluence/display/CLI/JFrog+CLI#JFrogCLI-JFrogPlatformConfiguration)
 
 
 Running the script:
