@@ -1,9 +1,23 @@
 #!/bin/bash
 
+check_for_exec() {
+        if ! [ -x "$(command -v $1)" ]; then
+           echo "Error: $1 is not installed." >&2
+           exit 1
+        fi
+}
+
 CLI="jf"
 if [[ "$1" == "legacy" ]]; then 
         CLI="jfrog"
 fi
+
+for i in "$CLI" "jq" 
+do
+   check_for_exec "$i"
+done
+
+
 REPOS=`$CLI rt curl /api/repositories | jq '.[] | select(.packageType == "Docker" and .type != "VIRTUAL") | .key'`
 COUNT=0
 
