@@ -14,4 +14,6 @@ It is recommended not to execute it during peak hours.
 
 In order to run the script, execute <i>countDocker.sh<i>
 
+Legacy JFrog CLI:
+If you are using a legacy version for the CLI (i.e., named <i>jfrog</i> and not <i>jf</i>), please execute: "countDoceker.sh legacy"
 
