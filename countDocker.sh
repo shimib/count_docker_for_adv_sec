@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Used to check for existence of pre-requisites
 check_for_exec() {
         if ! [ -x "$(command -v $1)" ]; then
            echo "Error: $1 is not installed." >&2
@@ -7,6 +8,7 @@ check_for_exec() {
         fi
 }
 
+# A simple progress bar
 function ProgressBar {
 # Process data
     let _progress=(${1}*100/${2}*100)/100
@@ -16,14 +18,15 @@ function ProgressBar {
     _fill=$(printf "%${_done}s")
     _empty=$(printf "%${_left}s")
 
-# 1.2 Build progressbar strings and print the ProgressBar line
-# 1.2.1 Output example:
-# 1.2.1.1 Progress : [########################################] 100%
-printf "\rProgress : [${_fill// /#}${_empty// /-}] ${_progress}%%"
-
+    printf "\rProgress : [${_fill// /#}${_empty// /-}] ${_progress}%%"
 }
+# Will accumulate results from the AQL batches
 OUTPUT_FILE="docker_images_sha.txt"
+# Clearing previous results
 echo "" > $OUTPUT_FILE
+
+# Run a single batch. Params are starting index (inclusive), end index (exclusive) and the entire array of repository names.
+# Results will be written to OUTPUT_FILE
 function RunBatch {
    _start=${1}
    _end=${2}
@@ -54,6 +57,7 @@ min() {
 }
 
 CLI="jf"
+# Testing whether we should use 'jfrog' and not 'jf'
 if [[ "$1" == "legacy" ]]; then 
         CLI="jfrog"
 fi
@@ -63,7 +67,7 @@ do
    check_for_exec "$i"
 done
 
-
+# Retrieve all repositories of type Docker which are not Virtual
 REPOS=`$CLI rt curl /api/repositories --silent | jq '.[] | select(.packageType == "Docker" and .type != "VIRTUAL") | .key'`
 if [[ "${REPOS}" == "" ]]; then
         echo "No Docker repositories to scan"
@@ -74,10 +78,12 @@ TOTAL=`echo "$REPOS" | wc -l |  cut -w -f 2`
 echo "Going through ${TOTAL} Docker repositories"
 
 #echo "$REPOS"
+# Convert the lines into an array
 SAVEIFS=$IFS   # Save current IFS (Internal Field Separator)
 IFS=$'\n'      # Change IFS to newline char
 arr2=($REPOS)
 IFS=$SAVEIFS   # Restore original IFS
+
 BATCH_SIZE=122
 BATCH_COUNT=$((TOTAL/BATCH_SIZE+1))
 #echo "TOTAL: ${TOTAL}"
@@ -92,6 +98,7 @@ do
         ProgressBar $i $((BATCH_COUNT-1))
         RunBatch $sPos $ePos "${arr2[@]}" 
 done
+# Now need just the unique count of the SHAs
 FINAL_RES=`cat $OUTPUT_FILE | tr ' ' '\n' | sort | uniq | wc -l | cut -w -f 2`
 echo
 echo "Docker images through last 3 months: ${FINAL_RES}"
